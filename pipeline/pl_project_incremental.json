@@ -1,0 +1,239 @@
+{
+	"name": "pl_project_incremental",
+	"properties": {
+		"activities": [
+			{
+				"name": "ForEach for incremental",
+				"type": "ForEach",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@pipeline().parameters.tablelist",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Lookup for oldwatermark value",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "\n\nselect WatermarkValue from watermarktable where\ntablename = '@{item().tableName}'",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "ds_lookup_oldwatermark",
+									"type": "DatasetReference"
+								}
+							}
+						},
+						{
+							"name": "Lookup for newwatermark",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "select max(last_update) as newwatermarkvalue\nfrom @{item().tableName};",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "AzureSqlTable1",
+									"type": "DatasetReference"
+								}
+							}
+						},
+						{
+							"name": "Copy data for incremental",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Lookup for oldwatermark value",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "Lookup for newwatermark",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "select * from\n@{item().tableName}\nwhere @{item().WaterMark_Column} > '@{pipeline().parameters.Timestamp}'\nand @{item().WaterMark_Column} <= '@{formatDateTime(activity('Lookup for newwatermark').output.firstRow.newwatermarkvalue,'yyyy-MM-ddTHH:mm:ss')}'",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "AzureSqlSink",
+									"preCopyScript": {
+										"value": "delete\nfrom @{item().tableName}\nwhere @{item().WaterMark_Column} >=\n'@{formatDateTime(\n    startOfMonth(addToTime(startOfMonth(utcNow()), -2, 'Month')),\n    'yyyy-MM-dd'\n)}'\nand @{item().WaterMark_Column} <\n'@{formatDateTime(startOfMonth(utcNow()), 'yyyy-MM-dd')}'",
+										"type": "Expression"
+									},
+									"writeBehavior": "upsert",
+									"upsertSettings": {
+										"useTempDB": true,
+										"keys": [
+											"ID"
+										]
+									},
+									"sqlWriterUseTableLock": false,
+									"disableMetricsCollection": false
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "ds_copy_bronze",
+									"type": "DatasetReference",
+									"parameters": {
+										"schemaname": {
+											"value": "@item().tableSchemaName",
+											"type": "Expression"
+										},
+										"tablename": {
+											"value": "@item().tableName",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "ds_copy_projectdb",
+									"type": "DatasetReference",
+									"parameters": {
+										"schemaname": {
+											"value": "@item().tableSchemaName",
+											"type": "Expression"
+										},
+										"tablename": {
+											"value": "@item().tableName",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "Stored procedure1",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Copy data for incremental",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[dbo].[usp_write_watermark2]",
+								"storedProcedureParameters": {
+									"last_update": {
+										"value": {
+											"value": "@activity('Lookup for newwatermark').output.firstRow.newwatermarkvalue",
+											"type": "Expression"
+										},
+										"type": "DateTime"
+									},
+									"TableName": {
+										"value": {
+											"value": "@item().tableName",
+											"type": "Expression"
+										},
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "AzureSqlDatabase1",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"tablelist": {
+				"type": "array",
+				"defaultValue": [
+					{
+						"tableName": "iplteams",
+						"tableSchemaName": "dbo",
+						"WaterMark_Column": "last_update"
+					},
+					{
+						"tableName": "employees",
+						"tableSchemaName": "dbo",
+						"WaterMark_Column": "last_update"
+					}
+				]
+			},
+			"Timestamp": {
+				"type": "string",
+				"defaultValue": "2024-01-01"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-12-22T18:00:44Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

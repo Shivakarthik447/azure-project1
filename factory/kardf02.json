@@ -1,0 +1,9 @@
+{
+	"name": "kardf02",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "8b9069a0-7f65-4695-9759-be6ba368a7f0",
+		"tenantId": "cfc340ea-803f-423a-a0da-51c0907dd10c"
+	}
+}

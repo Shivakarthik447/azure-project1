@@ -1,0 +1,122 @@
+{
+	"name": "pl_customload",
+	"properties": {
+		"activities": [
+			{
+				"name": "ForEach for customload",
+				"type": "ForEach",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@pipeline().parameters.Tablelist",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Copy data for custom",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "select * \nfrom @{item().tableName}\nwhere '@{item().WaterMark_Column}' > '@{formatDateTime(addhours(utcNow(),-46),'YYYY-MM-DDTHH')}' ",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "AzureSqlSink",
+									"preCopyScript": {
+										"value": "delete\nfrom @{item().tableName}\nwhere '@{item().WaterMark_Column}' > '@{formatDateTime(addhours(utcNow(),-46),'YYYY-MM-DDTHH')}' ",
+										"type": "Expression"
+									},
+									"writeBehavior": "upsert",
+									"upsertSettings": {
+										"useTempDB": true,
+										"keys": [
+											"id"
+										]
+									},
+									"sqlWriterUseTableLock": false,
+									"disableMetricsCollection": false
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "ds_copy_sqldb02",
+									"type": "DatasetReference",
+									"parameters": {
+										"schemaname": {
+											"value": "@item().tableSchemaName",
+											"type": "Expression"
+										},
+										"tablename": {
+											"value": "@item().tableName",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "ds_copy_sqldb02",
+									"type": "DatasetReference",
+									"parameters": {
+										"schemaname": "@item().tableSchemaName",
+										"tablename": "@item().tableName"
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"Tablelist": {
+				"type": "array",
+				"defaultValue": [
+					{
+						"tableName": "iplteams",
+						"tableSchemaName": "dbo",
+						"WaterMark_Column": "last_updated"
+					},
+					{
+						"tableName": "employees",
+						"tableSchemaName": "dbo",
+						"WaterMark_Column": "last_updated"
+					},
+					{
+						"tableName": "salesitems",
+						"tableSchemaName": "dbo",
+						"WaterMark_Column": "last_updated"
+					}
+				]
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-12-20T11:18:38Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
