@@ -482,7 +482,7 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"tablename": {
-											"value": "@activity('Lookup1').output.firstRow.TableName",
+											"value": "@concat('dbo.', activity('Lookup1').output.firstRow.TableName)",
 											"type": "Expression"
 										}
 									}
