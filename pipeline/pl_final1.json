@@ -24,6 +24,7 @@
 					],
 					"storeSettings": {
 						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
 						"enablePartitionDiscovery": false
 					},
 					"formatSettings": {
@@ -166,7 +167,14 @@
 						{
 							"name": "Copy data2",
 							"type": "Copy",
-							"dependsOn": [],
+							"dependsOn": [
+								{
+									"activity": "Lookup1",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
 							"policy": {
 								"timeout": "0.12:00:00",
 								"retry": 0,
@@ -189,17 +197,266 @@
 								},
 								"sink": {
 									"type": "AzureSqlSink",
-									"preCopyScript": {
-										"value": "delete from @{item().name}",
-										"type": "Expression"
+									"preCopyScript": "delete from @concat('dbo.', item().TableName)\n",
+									"writeBehavior": "upsert",
+									"upsertSettings": {
+										"useTempDB": true,
+										"keys": [
+											"VBELN"
+										]
 									},
-									"writeBehavior": "insert",
 									"sqlWriterUseTableLock": false,
 									"disableMetricsCollection": false
 								},
 								"enableStaging": false,
 								"translator": {
 									"type": "TabularTranslator",
+									"mappings": [
+										{
+											"source": {
+												"name": "VBELN",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "VBELN",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "FKART",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "FKART",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "VKORG",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "VKORG",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "VTWEG",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "VTWEG",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "SPART",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "SPART",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "FKDAT",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "FKDAT",
+												"type": "String",
+												"physicalType": "char"
+											}
+										},
+										{
+											"source": {
+												"name": "KUNAG",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "KUNAG",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "KUNRG",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "KUNRG",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "WAERK",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "WAERK",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "NETWR",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "NETWR",
+												"type": "Decimal",
+												"physicalType": "decimal",
+												"scale": 2,
+												"precision": 15
+											}
+										},
+										{
+											"source": {
+												"name": "MWSBK",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "MWSBK",
+												"type": "Decimal",
+												"physicalType": "decimal",
+												"scale": 2,
+												"precision": 15
+											}
+										},
+										{
+											"source": {
+												"name": "FKSTO",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "FKSTO",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "SFAKN",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "SFAKN",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "ERNAM",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "ERNAM",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "ERDAT",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "ERDAT",
+												"type": "String",
+												"physicalType": "char"
+											}
+										},
+										{
+											"source": {
+												"name": "ERZET",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "ERZET",
+												"type": "String",
+												"physicalType": "char"
+											}
+										},
+										{
+											"source": {
+												"name": "AENAM",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "AENAM",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "AEDAT",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "AEDAT",
+												"type": "String",
+												"physicalType": "char"
+											}
+										},
+										{
+											"source": {
+												"name": "BUKRS",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "BUKRS",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "CREATED_TS",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "CREATED_TS",
+												"type": "Byte[]",
+												"physicalType": "timestamp"
+											}
+										}
+									],
 									"typeConversion": true,
 									"typeConversionSettings": {
 										"allowDataTruncation": true,
@@ -225,12 +482,41 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"tablename": {
-											"value": "@item().name",
+											"value": "@activity('Lookup1').output.firstRow.TableName",
 											"type": "Expression"
 										}
 									}
 								}
 							]
+						},
+						{
+							"name": "Lookup1",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "SELECT * FROM dbo.FileToTableConfig\nwhere FileName = '@{item().name}'",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "AzureSqlTable3",
+									"type": "DatasetReference"
+								},
+								"firstRowOnly": true
+							}
 						}
 					]
 				}
