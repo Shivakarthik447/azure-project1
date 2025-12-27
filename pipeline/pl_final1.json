@@ -50,7 +50,7 @@
 						"type": "Expression"
 					},
 					"condition": {
-						"value": "@contains(item().name,'VBRK')",
+						"value": "@contains(toLower(item().name), 'vbrk')\n",
 						"type": "Expression"
 					}
 				}
@@ -163,6 +163,7 @@
 						"value": "@activity('Filter1').output.value",
 						"type": "Expression"
 					},
+					"isSequential": true,
 					"activities": [
 						{
 							"name": "Copy data2",
@@ -197,7 +198,10 @@
 								},
 								"sink": {
 									"type": "AzureSqlSink",
-									"preCopyScript": "delete from @concat('dbo.', item().TableName)\n",
+									"preCopyScript": {
+										"value": "@concat('TRUNCATE TABLE test.', replace(item().name, '.csv',''))\n",
+										"type": "Expression"
+									},
 									"writeBehavior": "upsert",
 									"upsertSettings": {
 										"useTempDB": true,
@@ -211,252 +215,6 @@
 								"enableStaging": false,
 								"translator": {
 									"type": "TabularTranslator",
-									"mappings": [
-										{
-											"source": {
-												"name": "VBELN",
-												"type": "String",
-												"physicalType": "String"
-											},
-											"sink": {
-												"name": "VBELN",
-												"type": "String",
-												"physicalType": "varchar"
-											}
-										},
-										{
-											"source": {
-												"name": "FKART",
-												"type": "String",
-												"physicalType": "String"
-											},
-											"sink": {
-												"name": "FKART",
-												"type": "String",
-												"physicalType": "varchar"
-											}
-										},
-										{
-											"source": {
-												"name": "VKORG",
-												"type": "String",
-												"physicalType": "String"
-											},
-											"sink": {
-												"name": "VKORG",
-												"type": "String",
-												"physicalType": "varchar"
-											}
-										},
-										{
-											"source": {
-												"name": "VTWEG",
-												"type": "String",
-												"physicalType": "String"
-											},
-											"sink": {
-												"name": "VTWEG",
-												"type": "String",
-												"physicalType": "varchar"
-											}
-										},
-										{
-											"source": {
-												"name": "SPART",
-												"type": "String",
-												"physicalType": "String"
-											},
-											"sink": {
-												"name": "SPART",
-												"type": "String",
-												"physicalType": "varchar"
-											}
-										},
-										{
-											"source": {
-												"name": "FKDAT",
-												"type": "String",
-												"physicalType": "String"
-											},
-											"sink": {
-												"name": "FKDAT",
-												"type": "String",
-												"physicalType": "char"
-											}
-										},
-										{
-											"source": {
-												"name": "KUNAG",
-												"type": "String",
-												"physicalType": "String"
-											},
-											"sink": {
-												"name": "KUNAG",
-												"type": "String",
-												"physicalType": "varchar"
-											}
-										},
-										{
-											"source": {
-												"name": "KUNRG",
-												"type": "String",
-												"physicalType": "String"
-											},
-											"sink": {
-												"name": "KUNRG",
-												"type": "String",
-												"physicalType": "varchar"
-											}
-										},
-										{
-											"source": {
-												"name": "WAERK",
-												"type": "String",
-												"physicalType": "String"
-											},
-											"sink": {
-												"name": "WAERK",
-												"type": "String",
-												"physicalType": "varchar"
-											}
-										},
-										{
-											"source": {
-												"name": "NETWR",
-												"type": "String",
-												"physicalType": "String"
-											},
-											"sink": {
-												"name": "NETWR",
-												"type": "Decimal",
-												"physicalType": "decimal",
-												"scale": 2,
-												"precision": 15
-											}
-										},
-										{
-											"source": {
-												"name": "MWSBK",
-												"type": "String",
-												"physicalType": "String"
-											},
-											"sink": {
-												"name": "MWSBK",
-												"type": "Decimal",
-												"physicalType": "decimal",
-												"scale": 2,
-												"precision": 15
-											}
-										},
-										{
-											"source": {
-												"name": "FKSTO",
-												"type": "String",
-												"physicalType": "String"
-											},
-											"sink": {
-												"name": "FKSTO",
-												"type": "String",
-												"physicalType": "varchar"
-											}
-										},
-										{
-											"source": {
-												"name": "SFAKN",
-												"type": "String",
-												"physicalType": "String"
-											},
-											"sink": {
-												"name": "SFAKN",
-												"type": "String",
-												"physicalType": "varchar"
-											}
-										},
-										{
-											"source": {
-												"name": "ERNAM",
-												"type": "String",
-												"physicalType": "String"
-											},
-											"sink": {
-												"name": "ERNAM",
-												"type": "String",
-												"physicalType": "varchar"
-											}
-										},
-										{
-											"source": {
-												"name": "ERDAT",
-												"type": "String",
-												"physicalType": "String"
-											},
-											"sink": {
-												"name": "ERDAT",
-												"type": "String",
-												"physicalType": "char"
-											}
-										},
-										{
-											"source": {
-												"name": "ERZET",
-												"type": "String",
-												"physicalType": "String"
-											},
-											"sink": {
-												"name": "ERZET",
-												"type": "String",
-												"physicalType": "char"
-											}
-										},
-										{
-											"source": {
-												"name": "AENAM",
-												"type": "String",
-												"physicalType": "String"
-											},
-											"sink": {
-												"name": "AENAM",
-												"type": "String",
-												"physicalType": "varchar"
-											}
-										},
-										{
-											"source": {
-												"name": "AEDAT",
-												"type": "String",
-												"physicalType": "String"
-											},
-											"sink": {
-												"name": "AEDAT",
-												"type": "String",
-												"physicalType": "char"
-											}
-										},
-										{
-											"source": {
-												"name": "BUKRS",
-												"type": "String",
-												"physicalType": "String"
-											},
-											"sink": {
-												"name": "BUKRS",
-												"type": "String",
-												"physicalType": "varchar"
-											}
-										},
-										{
-											"source": {
-												"name": "CREATED_TS",
-												"type": "String",
-												"physicalType": "String"
-											},
-											"sink": {
-												"name": "CREATED_TS",
-												"type": "Byte[]",
-												"physicalType": "timestamp"
-											}
-										}
-									],
 									"typeConversion": true,
 									"typeConversionSettings": {
 										"allowDataTruncation": true,
@@ -482,7 +240,7 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"tablename": {
-											"value": "@concat('dbo.', activity('Lookup1').output.firstRow.TableName)",
+											"value": "@concat(replace(item().name, '.csv',''))",
 											"type": "Expression"
 										}
 									}
@@ -492,6 +250,8 @@
 						{
 							"name": "Lookup1",
 							"type": "Lookup",
+							"state": "Inactive",
+							"onInactiveMarkAs": "Succeeded",
 							"dependsOn": [],
 							"policy": {
 								"timeout": "0.12:00:00",
