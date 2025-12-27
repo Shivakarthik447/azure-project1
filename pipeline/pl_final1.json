@@ -240,7 +240,7 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"tablename": {
-											"value": "'shiva'",
+											"value": "@concat(replace(item().name, '.csv',''))",
 											"type": "Expression"
 										}
 									}
