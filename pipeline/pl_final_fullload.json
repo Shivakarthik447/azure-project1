@@ -40,7 +40,7 @@
 								"sink": {
 									"type": "AzureSqlSink",
 									"preCopyScript": {
-										"value": "@concat('TRUNCATE TABLE @item().tableSchemaName.', replace(item().tableName, '.csv',''))\n",
+										"value": "@concat('TRUNCATE TABLE @item().tableSchemaName', replace(item().tableName, '.csv',''))\n",
 										"type": "Expression"
 									},
 									"writeBehavior": "upsert",
