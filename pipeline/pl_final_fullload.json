@@ -12,6 +12,7 @@
 						"value": "@pipeline().parameters.tablelist",
 						"type": "Expression"
 					},
+					"isSequential": true,
 					"activities": [
 						{
 							"name": "Copy data1",
@@ -40,7 +41,7 @@
 								"sink": {
 									"type": "AzureSqlSink",
 									"preCopyScript": {
-										"value": "@concat('TRUNCATE TABLE', item().tableSchemaName,'.', replace(item().tableName, '.csv',''))\n",
+										"value": "@{concat(\n    'TRUNCATE TABLE ',\n    item().tableSchemaName,\n    '.',\n    replace(item().tableName, '.csv', '')\n)}\n",
 										"type": "Expression"
 									},
 									"writeBehavior": "upsert",
