@@ -47,9 +47,10 @@
 									"writeBehavior": "upsert",
 									"upsertSettings": {
 										"useTempDB": true,
-										"keys": [
-											"MATNR"
-										]
+										"keys": {
+											"value": "@array(item().Key_column)\n",
+											"type": "Expression"
+										}
 									},
 									"sqlWriterUseTableLock": false,
 									"disableMetricsCollection": false
@@ -102,30 +103,35 @@
 				"type": "array",
 				"defaultValue": [
 					{
+						"Key_column": "MATNR",
 						"Filename": "sap_mara_sample.csv",
 						"tableName": "sap_mara_sample",
 						"tableSchemaName": "test",
 						"WaterMark_Column": "CREATED_AT"
 					},
 					{
+						"Key_column": "MATNR",
 						"Filename": "sap_sr01a_sample.csv",
 						"tableName": "sap_sr01a_sample",
 						"tableSchemaName": "test",
 						"WaterMark_Column": "CREATED_AT"
 					},
 					{
+						"Key_column": "MATNR",
 						"Filename": "sap_vbap_sample.csv",
 						"tableName": "sap_vbap_sample",
 						"tableSchemaName": "test",
 						"WaterMark_Column": "CREATED_AT"
 					},
 					{
+						"Key_column": "VBELN",
 						"Filename": "sap_vbrk_sample_with_ts.csv",
 						"tableName": "sap_vbrk_sample_with_ts",
 						"tableSchemaName": "test",
 						"WaterMark_Column": "CREATED_AT"
 					},
 					{
+						"Key_column": "VBELN",
 						"Filename": "sap_vbrk_sppyam_sample.csv",
 						"tableName": "sap_vbrk_sppyam_sample",
 						"tableSchemaName": "test",
