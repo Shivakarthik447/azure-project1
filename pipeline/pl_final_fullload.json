@@ -39,9 +39,18 @@
 								},
 								"sink": {
 									"type": "AzureSqlSink",
-									"writeBehavior": "insert",
+									"preCopyScript": {
+										"value": "@concat('TRUNCATE TABLE @item().tableSchemaName.', replace(item().tableName, '.csv',''))\n",
+										"type": "Expression"
+									},
+									"writeBehavior": "upsert",
+									"upsertSettings": {
+										"useTempDB": true,
+										"keys": [
+											"MATNR"
+										]
+									},
 									"sqlWriterUseTableLock": false,
-									"tableOption": "autoCreate",
 									"disableMetricsCollection": false
 								},
 								"enableStaging": false,
